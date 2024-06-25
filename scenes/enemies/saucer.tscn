@@ -1,0 +1,183 @@
+[gd_scene load_steps=14 format=3 uid="uid://c16jci2qm1ad3"]
+
+[ext_resource type="Texture2D" uid="uid://csspu2vap8ij0" path="res://assets/ships/saucer_2.png" id="1_fequ5"]
+[ext_resource type="Script" path="res://scenes/enemies/saucer.gd" id="1_ymkmg"]
+[ext_resource type="AudioStream" uid="uid://xwxb637jimnk" path="res://assets/sounds/misc/sci-fi-door.wav" id="3_23yv8"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xwia0"]
+radius = 36.0139
+
+[sub_resource type="Animation" id="Animation_dx6ii"]
+resource_name = "spin"
+length = 6.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Sprite2D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.28319]
+}
+
+[sub_resource type="Animation" id="Animation_hee4h"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Sprite2D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Area2D/Sprite2D:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sound:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_gmxvt"]
+resource_name = "shoot"
+length = 2.6
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sound:playing")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.2),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [true]
+}
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 1.2, 2.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"values": [{
+"args": [true],
+"method": &"set_shooting"
+}, {
+"args": [],
+"method": &"shoot"
+}, {
+"args": [false],
+"method": &"set_shooting"
+}]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_gkhxw"]
+_data = {
+"RESET": SubResource("Animation_hee4h"),
+"shoot": SubResource("Animation_gmxvt"),
+"spin": SubResource("Animation_dx6ii")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wfkmi"]
+animation = &"shoot"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bvcq1"]
+animation = &"spin"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_xy6vx"]
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_tq4xx"]
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_00sfy"]
+states/shoot/node = SubResource("AnimationNodeAnimation_wfkmi")
+states/shoot/position = Vector2(634, 100)
+states/spin/node = SubResource("AnimationNodeAnimation_bvcq1")
+states/spin/position = Vector2(380, 100)
+transitions = ["Start", "spin", SubResource("AnimationNodeStateMachineTransition_xy6vx"), "shoot", "spin", SubResource("AnimationNodeStateMachineTransition_tq4xx")]
+
+[node name="Saucer" type="PathFollow2D"]
+rotates = false
+script = ExtResource("1_ymkmg")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 5
+
+[node name="Sprite2D" type="Sprite2D" parent="Area2D"]
+texture = ExtResource("1_fequ5")
+offset = Vector2(0, 3)
+hframes = 7
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_xwia0")
+
+[node name="Booms" type="Node2D" parent="."]
+
+[node name="Marker2D" type="Marker2D" parent="Booms"]
+position = Vector2(-21, 0)
+
+[node name="Marker2D2" type="Marker2D" parent="Booms"]
+position = Vector2(23, 0)
+
+[node name="Marker2D3" type="Marker2D" parent="Booms"]
+position = Vector2(0, -21)
+
+[node name="Marker2D4" type="Marker2D" parent="Booms"]
+position = Vector2(-1, 20)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_gkhxw")
+}
+autoplay = "spin"
+
+[node name="Sound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_23yv8")
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource("AnimationNodeStateMachine_00sfy")
+anim_player = NodePath("../AnimationPlayer")
