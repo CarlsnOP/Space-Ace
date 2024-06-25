@@ -10,6 +10,10 @@ extends PathFollow2D
 @export var bullet_wait_time := 3.0
 @export var bullet_wait_time_var := 0.05
 
+#score
+@export var kill_me_score := 10
+@export var damage_taken := 10
+
 @onready var animated_sprite_2d = $AnimatedSprite2D
 @onready var laser_timer = $LaserTimer
 @onready var booms = $Booms
@@ -27,8 +31,6 @@ func _ready():
 	if !_player_ref:
 		queue_free()
 	animated_sprite_2d.play(_anim_string)
-	
-
 
 
 func _process(delta):
@@ -73,6 +75,7 @@ func die() -> void:
 	
 	set_process(false)
 	make_booms()
+	ScoreManager.increment_score(kill_me_score)
 	queue_free()
 
 func _on_laser_timer_timeout():
@@ -87,7 +90,7 @@ func _on_visible_on_screen_notifier_2d_screen_exited():
 	queue_free()
 
 func _on_area_2d_area_entered(area):
-	health_bar.take_damage(20)
+	health_bar.take_damage(damage_taken)
 
 func _on_health_bar_died():
 	die()

@@ -1,8 +1,9 @@
-[gd_scene load_steps=14 format=3 uid="uid://c16jci2qm1ad3"]
+[gd_scene load_steps=17 format=3 uid="uid://c16jci2qm1ad3"]
 
 [ext_resource type="Texture2D" uid="uid://csspu2vap8ij0" path="res://assets/ships/saucer_2.png" id="1_fequ5"]
 [ext_resource type="Script" path="res://scenes/enemies/saucer.gd" id="1_ymkmg"]
 [ext_resource type="AudioStream" uid="uid://xwxb637jimnk" path="res://assets/sounds/misc/sci-fi-door.wav" id="3_23yv8"]
+[ext_resource type="PackedScene" uid="uid://bvjkcrfx0br01" path="res://scenes/health_bar/health_bar.tscn" id="4_gcoae"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xwia0"]
 radius = 36.0139
@@ -62,6 +63,18 @@ tracks/2/keys = {
 "update": 1,
 "values": [false]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Area2D/Sprite2D:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
 
 [sub_resource type="Animation" id="Animation_gmxvt"]
 resource_name = "shoot"
@@ -112,12 +125,52 @@ tracks/2/keys = {
 }]
 }
 
+[sub_resource type="Animation" id="Animation_oudpe"]
+resource_name = "death"
+length = 1.4
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Area2D/Sprite2D:modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.695966, 0.000370703, 0.697067, 1), Color(0.694118, 0, 0.698039, 0)]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 1.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"values": [{
+"args": [false],
+"method": &"set_process"
+}, {
+"args": [],
+"method": &"make_booms"
+}, {
+"args": [],
+"method": &"die"
+}]
+}
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_gkhxw"]
 _data = {
 "RESET": SubResource("Animation_hee4h"),
+"death": SubResource("Animation_oudpe"),
 "shoot": SubResource("Animation_gmxvt"),
 "spin": SubResource("Animation_dx6ii")
 }
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_g2x2h"]
+animation = &"death"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wfkmi"]
 animation = &"shoot"
@@ -133,17 +186,20 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_00sfy"]
+states/death/node = SubResource("AnimationNodeAnimation_g2x2h")
+states/death/position = Vector2(623, 160)
 states/shoot/node = SubResource("AnimationNodeAnimation_wfkmi")
 states/shoot/position = Vector2(634, 100)
 states/spin/node = SubResource("AnimationNodeAnimation_bvcq1")
 states/spin/position = Vector2(380, 100)
 transitions = ["Start", "spin", SubResource("AnimationNodeStateMachineTransition_xy6vx"), "shoot", "spin", SubResource("AnimationNodeStateMachineTransition_tq4xx")]
+graph_offset = Vector2(31, 46)
 
 [node name="Saucer" type="PathFollow2D"]
 rotates = false
 script = ExtResource("1_ymkmg")
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Area2D" type="Area2D" parent="." groups=["saucer"]]
 collision_layer = 2
 collision_mask = 5
 
@@ -159,6 +215,8 @@ shape = SubResource("CircleShape2D_xwia0")
 
 [node name="Marker2D" type="Marker2D" parent="Booms"]
 position = Vector2(-21, 0)
+
+[node name="Marker2D5" type="Marker2D" parent="Booms"]
 
 [node name="Marker2D2" type="Marker2D" parent="Booms"]
 position = Vector2(23, 0)
@@ -181,3 +239,12 @@ stream = ExtResource("3_23yv8")
 [node name="AnimationTree" type="AnimationTree" parent="."]
 tree_root = SubResource("AnimationNodeStateMachine_00sfy")
 anim_player = NodePath("../AnimationPlayer")
+
+[node name="HealthBar" parent="." instance=ExtResource("4_gcoae")]
+offset_left = -30.0
+offset_top = -40.0
+offset_right = 30.0
+offset_bottom = -37.0
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
+[connection signal="died" from="HealthBar" to="." method="_on_health_bar_died"]

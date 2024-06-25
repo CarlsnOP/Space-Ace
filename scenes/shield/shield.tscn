@@ -1,0 +1,71 @@
+[gd_scene load_steps=7 format=3 uid="uid://cd8emidho4wvh"]
+
+[ext_resource type="Texture2D" uid="uid://dwqb4tdk1yqbe" path="res://assets/shield/spr_shield_small.png" id="1_75atm"]
+[ext_resource type="Script" path="res://scenes/shield/shield.gd" id="1_x7l7e"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0b6oh"]
+radius = 31.0
+
+[sub_resource type="Animation" id="Animation_5q436"]
+resource_name = "hit"
+length = 0.4
+step = 0.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.888783, 0, 0.118714, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_i73l5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_13uxi"]
+_data = {
+"RESET": SubResource("Animation_i73l5"),
+"hit": SubResource("Animation_5q436")
+}
+
+[node name="Shield" type="Area2D"]
+collision_mask = 10
+script = ExtResource("1_x7l7e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_0b6oh")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = -1.5708
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("1_75atm")
+
+[node name="Sound" type="AudioStreamPlayer2D" parent="."]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_13uxi")
+}
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 8.0
+one_shot = true
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

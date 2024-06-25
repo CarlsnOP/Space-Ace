@@ -4,7 +4,8 @@ class_name Player
 
 
 @onready var sprite_2d = $Sprite2D
-@onready var animation_player = $CollisionShape2D/AnimationPlayer
+@onready var animation_player = $AnimationPlayer
+@onready var shield = $Shield
 
 
 @export var bullet_scene: PackedScene
@@ -72,4 +73,15 @@ func shoot() -> void:
 	get_tree().root.add_child(bullet)
 
 func on_powerup_hit(power_up: GameData.POWERUP_TYPE) -> void:
-	pass
+	if power_up == GameData.POWERUP_TYPE.SHIELD:
+		shield.enable_shield()
+
+func _on_area_entered(area):
+	if area.is_in_group(GameData.GROUP_ENEMY_SHIP):
+		SignalManager.on_player_hit.emit(GameData.COLLISION_DAMAGE)
+	elif area.is_in_group(GameData.GROUP_SAUCER):
+		SignalManager.on_player_hit.emit(GameData.COLLISION_DAMAGE)
+	elif area.is_in_group(GameData.GROUP_HOMING_MISSILE):
+		SignalManager.on_player_hit.emit(GameData.MISSILE_DAMAGE)
+	elif area.is_in_group(GameData.GROUP_BULLET):
+		SignalManager.on_player_hit.emit(area.get_damage())

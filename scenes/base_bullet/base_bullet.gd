@@ -26,8 +26,11 @@ func blow_up(area: Node2D) -> void:
 	set_process(false)
 	queue_free()
 
+func get_damage() -> int:
+	return _damage
+
 func _on_visible_on_screen_notifier_2d_screen_exited():
 	queue_free()
-
+ 
 func _on_area_entered(area):
 	blow_up(area)
